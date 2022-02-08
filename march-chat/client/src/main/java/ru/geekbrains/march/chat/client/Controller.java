@@ -1,17 +1,15 @@
 package ru.geekbrains.march.chat.client;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -73,13 +71,32 @@ public class Controller implements Initializable {
             socket = new Socket("localhost", 8189);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+
+                FileOutputStream history = new FileOutputStream("history_" + loginField.getText() + ".txt", true);
+//                FileInputStream inHistory = new FileInputStream("history_" + loginField.getText() + ".txt");
+
+
             Thread t = new Thread(() -> {
-                try {
+                try (BufferedReader reader = new BufferedReader(new FileReader("history_" + loginField.getText() + ".txt"))) {
+                     {
+                        String str;
+                        while ((str = reader.readLine()) != null){
+                            msgArea.appendText(str);
+                        }
+                    }
                     // Цикл авторизации
                     while (true) {
                         String msg = in.readUTF();
                         if (msg.startsWith("/login_ok ")) {
                             setUsername(msg.split("\\s")[1]);
+//                            try {
+//                                int x;
+//                                while ((x = inHistory.read()) > -1){
+//                                    msgArea.appendText(String.valueOf(x));
+//                                }
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
                             break;
                         }
                         if (msg.startsWith("/login_failed ")) {
@@ -105,6 +122,10 @@ public class Controller implements Initializable {
                             continue;
                         }
                         msgArea.appendText(msg + "\n");
+                        byte[] outData = msg.getBytes(StandardCharsets.UTF_8);
+                        history.write(outData);
+
+
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

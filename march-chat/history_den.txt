@@ -1,0 +1,1 @@
+Клиент superdenchik вошел в чатsuperdenchik: hi JohnПользователю: superJohn Сообщение: how are you?superJohn: exitКлиент superJohn вышел из чатаКлиент superJohn вошел в чат
